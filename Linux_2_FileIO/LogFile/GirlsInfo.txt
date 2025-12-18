@@ -1,0 +1,3 @@
+[Girl_Card] Index[1] name:[       Alice] sensitive[17]
+[Girl_Card] Index[2] name:[   Elizebath] sensitive[18]
+[Girl_Card] Index[3] name:[      Kiriko] sensitive[17]
