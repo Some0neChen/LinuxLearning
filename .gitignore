@@ -11,6 +11,7 @@
 *.s
 bin/
 build/
+.cache/
 
 # --- VS Code 配置 (个人配置通常不上传，但 tasks.json 可以保留) ---
 # 如果你想让两台电脑 VS Code 配置完全独立，就把下面这行取消注释
