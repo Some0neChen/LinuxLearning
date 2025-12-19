@@ -10,7 +10,7 @@ typedef struct {
     char name[20];      // 真名 (20 bytes)
     int loyalty;        // 忠诚度 (4 bytes) -> 这是我们要修改的敏感点！
 } SuccubusBody;
-
+// 重点理解每次操作，fd所指向的文件操作都会一直在走，一直在流动
 int main()
 {
     int SuccubusNums = 3;
@@ -36,10 +36,11 @@ int main()
         fscanf(stdin, "%d", &loyaltyArr[i]);
     }
 
-    lseek(fd, sizeof(int) + sizeof(char) * 20, SEEK_SET); // 这里要重新把指针指向第一个再去改
+    size_t loyaltyOffset = sizeof(int) + sizeof(char) * 20; // 从数据开头到Loyalty数据的偏移量
+    lseek(fd, loyaltyOffset, SEEK_SET); // 这里要重新把指针指向第一个再去改
     for (int i = 0; i < SuccubusNums; ++i) {
         write(fd, &loyaltyArr[i], sizeof(int));
-        lseek(fd, sizeof(SuccubusBody), SEEK_CUR);
+        lseek(fd, loyaltyOffset, SEEK_CUR);
     }
 
     // 这里要重新把指针指向第一个再去读
