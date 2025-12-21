@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🔨 Make Build (调用 Makefile)", // 任务名
+            "type": "shell",
+            "command": "make",     // 直接喊 make，它会自动读你的 Makefile
+            "args": [],            // 默认就是 debug 模式，不用加参数
+            "group": {
+                "kind": "build",
+                "isDefault": true  // 按 Ctrl+Shift+B 直接触发
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": "$gcc" // 依然用 gcc 的格式抓报错信息
+        },
+        {
+            "label": "🧹 Make Clean (清理现场)",
+            "type": "shell",
+            "command": "make",
+            "args": ["clean"],     // 相当于在终端敲 make clean
+            "group": "none",
+            "problemMatcher": []
+        }
+    ]
+}
