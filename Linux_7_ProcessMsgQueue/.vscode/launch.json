@@ -1,0 +1,61 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "😈 调试主程序 (默认-跟父进程)",
+            "type": "cppdbg",
+            "request": "launch",
+            // 【重点修改】：你的 Makefile 生成的是 main，所以这里写死 workspaceFolder 下的 main
+            "program": "${workspaceFolder}/main", 
+            "args": ["main", "bash"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "默认跟踪父进程",
+                    "text": "set follow-fork-mode parent",
+                    "ignoreFailures": true
+                }
+            ],
+            // 【重点修改】：这里必须跟 tasks.json 里的 label 一模一样
+            "preLaunchTask": "🔨 Make Build (调用 Makefile)", 
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "👻 调试主程序 (跟子进程-Fork专用)",
+            "type": "cppdbg",
+            "request": "launch",
+            // 【重点修改】：同上，指向 main
+            "program": "${workspaceFolder}/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "切换为跟踪子进程",
+                    "text": "set follow-fork-mode child", // 这里的魔法依然保留！
+                    "ignoreFailures": true
+                }
+            ],
+            // 【重点修改】：同上
+            "preLaunchTask": "🔨 Make Build (调用 Makefile)",
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ]
+}

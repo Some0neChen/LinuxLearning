@@ -1,0 +1,30 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "build/logApi.o",
+      "logApi.c"
+    ],
+    "directory": "/home/some0nechen/文档/code/Linux_2_FileIO",
+    "file": "/home/some0nechen/文档/code/Linux_2_FileIO/logApi.c",
+    "output": "/home/some0nechen/文档/code/Linux_2_FileIO/build/logApi.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "build/main.o",
+      "main.c"
+    ],
+    "directory": "/home/some0nechen/文档/code/Linux_2_FileIO",
+    "file": "/home/some0nechen/文档/code/Linux_2_FileIO/main.c",
+    "output": "/home/some0nechen/文档/code/Linux_2_FileIO/build/main.o"
+  }
+]

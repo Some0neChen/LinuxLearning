@@ -27,11 +27,27 @@ int main()
     MaidStatus* maid = static_cast<MaidStatus*>(shm_addr);
     char msgInfo[512];
     while (true) {
+        if (maid->readFlag() || maid->getPid() == pid) {
+            // 对方还没读完，等会儿
+            usleep(100000); // 0.1秒
+            continue;
+        }
+        maid->switchFlag();
+        if (maid->assertQuit()) {
+            cout << "[" << pid << "] 收到 [" << maid->getPid() << "]退出信号, 结束通讯." << endl;
+            maid->switchFlag();
+            break;
+        }
         cout << "----------------******----------------" << endl;
         maid->show();
         cout << "----------------******----------------" << endl;
         maid->set(cin);
         cout << "----------------******----------------" << endl;
+        maid->switchFlag();
+        if (maid->assertQuit()) {
+            cout << "[" << pid << "] 发送了退出信号, 结束通讯." << endl;
+            break;
+        }
         sleep(1);
     }
     

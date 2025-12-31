@@ -34,7 +34,10 @@ public:
     MaidStatus& set(istream &is);
     MaidStatus& set(UINT32 excitement, char* command, char* gesture);
     bool readFlag() const;
+    void switchFlag();
     void show() const;
+    bool assertQuit() const;
+    int getPid() const;
 };
 
 #endif

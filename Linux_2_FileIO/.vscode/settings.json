@@ -1,0 +1,4 @@
+{
+    "makefile.configureOnOpen": false,
+    "C_Cpp.intelliSenseEngine": "disabled" // 禁用Microsoft C/C++ 插件，只有在调试时使用
+}

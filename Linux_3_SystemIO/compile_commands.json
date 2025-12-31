@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "build/main.o",
+      "main.c"
+    ],
+    "directory": "/home/some0nechen/文档/code/LinuxLearning/Linux_3_SystemIO",
+    "file": "/home/some0nechen/文档/code/LinuxLearning/Linux_3_SystemIO/main.c",
+    "output": "/home/some0nechen/文档/code/LinuxLearning/Linux_3_SystemIO/build/main.o"
+  }
+]

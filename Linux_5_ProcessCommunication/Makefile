@@ -6,7 +6,7 @@ BUILD_DIR 	= ./build
 SRC_DIR 	= ./
 
 # 2. 点名：把当前目录下所有 .c 抓进来，存到 SRCS 变量里
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS = pipe_filter.c main.c
 
 # 3.根据 SRCS，生成对应的 .o 名单
 # notdir代表去掉目录前缀，防止源文件是 src/main.c，最后.o文件在build/src/main.o

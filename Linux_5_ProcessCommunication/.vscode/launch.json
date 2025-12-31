@@ -7,7 +7,7 @@
             "request": "launch",
             // 【重点修改】：你的 Makefile 生成的是 main，所以这里写死 workspaceFolder 下的 main
             "program": "${workspaceFolder}/main", 
-            "args": [],
+            "args": ["main", "bash"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
