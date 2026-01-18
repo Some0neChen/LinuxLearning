@@ -7,14 +7,15 @@ SRC_DIR 	= ./
 
 # 2. 点名：把当前目录下所有 .c 抓进来，存到 SRCS 变量里
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+SRCS1 = ./womb.cpp
 
 # 3.根据 SRCS，生成对应的 .o 名单
 # notdir代表去掉目录前缀，防止源文件是 src/main.c，最后.o文件在build/src/main.o
-OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(notdir $(SRCS)))
+OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(notdir $(SRCS1)))
 
 # 4.【新增】: 预测生成的“秘密日记” (.d 文件)
 # 把 a.c, b.c -> a.d, b.d
-DEPS = $(patsubst %.cpp, $(BUILD_DIR)/%.d, $(notdir $(SRCS)))
+DEPS = $(patsubst %.cpp, $(BUILD_DIR)/%.d, $(notdir $(SRCS1)))
 
 # 5.开始操作
 # 刑具参数 (Compiler Flags)
