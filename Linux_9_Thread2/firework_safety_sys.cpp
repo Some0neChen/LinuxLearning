@@ -4,15 +4,15 @@ using namespace std;
 
 void* task_blackbox_logger(void* arg) {
     unsigned int times = 0;
-    int *oldstate = nullptr;
+    int oldstate{0};
     while (true) {
         usleep(500000);
-        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, oldstate);
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldstate);
         ++times;
         cout << "[黑匣子] 开始写入第 " << times <<" 条关键数据..." << endl;
         usleep(2000000);
         cout << "[黑匣子] 第 " << times <<"条数据写入完毕！" << endl;
-        pthread_setcancelstate(*oldstate, nullptr);
+        pthread_setcancelstate(oldstate, nullptr);
     }
 }
 
@@ -46,7 +46,7 @@ int main() {
     } else {
         cout << "[主线程] 什么！记录员竟然想内卷继续加班！ 😰" << endl;
     }
-    pthread_join(loggerPtid, &temp);
+    pthread_join(enginePtid, &temp);
     if (temp == PTHREAD_CANCELED) {
         cout << "[主线程] 很好~计算员已下班~ 😊" << endl;
     } else {
