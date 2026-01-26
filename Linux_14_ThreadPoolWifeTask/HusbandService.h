@@ -62,11 +62,11 @@ public:
 
     void husbandRoutine() {
         unsigned long long pthid = pthread_self() & 0xFFFFF;
-        while(husband_wake_status_) {
+        while(husband_wake_status_ || !wife_task_queue_.empty()) {
             sem_wait(&task_sem_);
             pthread_mutex_lock(&task_mutex_);
             if (wife_task_queue_.empty()) {
-                pthread_mutex_lock(&task_mutex_);
+                pthread_mutex_unlock(&task_mutex_);
                 continue;
             }
             Chore wife_order = wife_task_queue_.front();
