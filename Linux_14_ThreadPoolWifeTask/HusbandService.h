@@ -17,6 +17,7 @@ class HusbandService
     pthread_mutex_t task_mutex_;
     bool husband_wake_status_;
     unsigned char pthread_nums_;
+
 public:
     HusbandService(unsigned char pthread_nums_) : pthread_nums_(pthread_nums_) {
         sem_init(&task_sem_, 0, 0);
@@ -34,8 +35,12 @@ public:
         for (int i = 0; i < husband_threads_.size(); ++i) {
             sem_post(&task_sem_);
         }
-        for (auto it : husband_threads_) {
-            pthread_join(it, nullptr);
+        for (auto it = husband_threads_.begin(); it != husband_threads_.end(); ++it) {
+            if (*it == 0) {
+                continue;
+            }
+            pthread_join(*it, nullptr);
+            *it = 0;
         }
     }
 
@@ -55,6 +60,7 @@ public:
         sem_post(&task_sem_);
     }
 
+private:
     void taskHandler(const Chore &chore, const unsigned long long &pthid) {
         std::cout << "老公的[" << pthid<< "]小心思正在完成老婆的第 #" << chore.id << " 任务： " << chore.description << std::endl;
         usleep(chore.complexity * 100000);
@@ -79,6 +85,7 @@ public:
     static void* husband_love_wife_action_enable(void* args) {
         HusbandService* husbandService = static_cast<HusbandService*>(args);
         husbandService->husbandRoutine();
+        return nullptr;
     }
 
 };

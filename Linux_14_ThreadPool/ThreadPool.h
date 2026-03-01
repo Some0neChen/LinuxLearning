@@ -53,6 +53,9 @@ public:
         pthread_mutex_unlock(&mutex_);
         pthread_mutex_destroy(&mutex_);
     }
+    
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
 
     void addTask(Task task) {
         pthread_mutex_lock(&mutex_);

@@ -9,7 +9,16 @@ enum ChoreType {
     MASSAGE_LEG,    // 按摩大腿
     WRITE_CODE,     // 写代码
     BUY_MILK,       // 买奶茶
-    WARM_BED        // 暖床 (优先级最高!)
+    WARM_BED,       // 暖床 (优先级最高!)
+    CHORE_TYPE_MAX
+};
+
+inline std::string chore_type_description_map_[CHORE_TYPE_MAX] = {
+    "洗碗",
+    "按摩老婆大腿",
+    "写代码",
+    "买奶茶",
+    "暖床"
 };
 
 struct Chore {
