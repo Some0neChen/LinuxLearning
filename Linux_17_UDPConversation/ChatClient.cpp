@@ -1,5 +1,7 @@
 #include <arpa/inet.h>
+#include <atomic>
 #include <cerrno>
+#include <csignal>
 #include <cstring>
 #include <iostream>
 #include <netinet/in.h>
@@ -11,14 +13,28 @@
 
 using namespace std;
 
+string client_user_name;
+atomic<bool> running_state;
+
+void signal_handler(int signal)
+{
+    running_state.store(false);
+    return;
+}
+
 void *recv_msg(void *args)
 {
     int* sock_fd = static_cast<int*>(args);
     ssize_t rcv_len;
     char buf[1024];
-    sockaddr sever_addr;
-    socklen_t len = sizeof(sever_addr);
-    while ((rcv_len = recvfrom(*sock_fd, buf, 1024, 0, &sever_addr, &len)) > 0) {
+    sockaddr server_addr;
+    socklen_t len = sizeof(server_addr);
+    while (running_state.load()) {
+        rcv_len = recvfrom(*sock_fd, buf, 1024, 0, &server_addr, &len);
+        if (rcv_len <= 0) {
+            cerr << "消息接收失败" << strerror(errno) << endl;
+            continue;
+        }
         rcv_len = rcv_len >= 1024 ? 1023 : rcv_len;
         buf[rcv_len] = '\0';
         if (strcmp(buf, "exit") == 0) {
@@ -31,20 +47,21 @@ void *recv_msg(void *args)
     return nullptr;
 }
 
-void send_exit(char* buf, int *fd, ssize_t *send_len, sockaddr_in *sever_addr, ssize_t* sockaddr_len)
+void send_exit(char* buf, int *fd, ssize_t *send_len, sockaddr_in *server_addr, ssize_t* sockaddr_len)
 {
     udp_msg_header* header = reinterpret_cast<udp_msg_header*>(buf);
     header->type = EXIT;
-    header->msg_len = sizeof(udp_msg_header);
+    header->msg_len = 0;
+    memcpy(header->name, client_user_name.data(), client_user_name.size());
     
     if ((*send_len = sendto(*fd, buf, sizeof(udp_msg_header), 0,
-        static_cast<sockaddr*>(static_cast<void*>(sever_addr)), *sockaddr_len)) == -1) {
+        static_cast<sockaddr*>(static_cast<void*>(server_addr)), *sockaddr_len)) == -1) {
         cerr << "消息发送失败" << strerror(errno) << endl;
     }
     return;
 }
 
-void reg_users(int* fd, sockaddr_in* sever_addr, ssize_t* sockaddr_len)
+void reg_users(int* fd, sockaddr_in* server_addr, ssize_t* sockaddr_len)
 {
     char buf[1024];
     udp_msg_header* reg_header = reinterpret_cast<udp_msg_header*>(buf);
@@ -53,9 +70,11 @@ void reg_users(int* fd, sockaddr_in* sever_addr, ssize_t* sockaddr_len)
     cout << "请输入用户名进行注册: ";
     cin >> reg_header->name;
     ssize_t send_len;
-    if ((send_len = sendto(*fd, buf, sizeof(udp_msg_header), 0, static_cast<sockaddr*>(static_cast<void*>(sever_addr)), *sockaddr_len)) == -1) {
-        cerr << "消息发送失败" << endl;
+    if ((send_len = sendto(*fd, buf, sizeof(udp_msg_header), 0, static_cast<sockaddr*>(static_cast<void*>(server_addr)), *sockaddr_len)) == -1) {
+        cerr << "消息发送失败" << strerror(errno) << endl;
+        return;
     }
+    client_user_name = std::move(reg_header->name);
     return;
 }
 
@@ -68,27 +87,32 @@ void *send_msg(void *args)
     size_t sub_idx;
     char buf[1024];
     ssize_t send_len, sockaddr_len = sizeof(sockaddr);
-    sockaddr_in sever_addr;
-    sever_addr.sin_family = AF_INET;
-    sever_addr.sin_port = htons(8888);
-    inet_pton(AF_INET, "192.168.182.128", static_cast<void*>(&sever_addr.sin_addr));
-    reg_users(fd, &sever_addr, &sockaddr_len);
+    sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(8888);
+    inet_pton(AF_INET, "192.168.182.128", static_cast<void*>(&server_addr.sin_addr));
+    reg_users(fd, &server_addr, &sockaddr_len);
 
     cout << "请输入消息内容，输入exit退出聊天~" << endl;
     cout << "发送消息的格式为: <用户名> <消息内容>" << endl;
     cout << "例如: Alice 你好呀~" << endl;
 
-    while ((read_len = read(0, str.data(), 1024))) {
+    while (running_state.load()) {
+        read_len = read(0, str.data(), 1024);
+        if (read_len <= 0) {
+            cerr << "读取消息失败" << strerror(errno) << endl;
+            continue;
+        }
         str.resize(read_len);
         str.pop_back();
         if (str == "exit") {
-            send_exit(buf, fd, &send_len, &sever_addr, &sockaddr_len);
+            send_exit(buf, fd, &send_len, &server_addr, &sockaddr_len);
             break;
         }
         udp_msg_header* header = reinterpret_cast<udp_msg_header*>(buf);
         sub_idx = str.find_first_of(" ");
         if (sub_idx == string::npos) {
-            cerr << "消息格式错误，请按照<用户名> <消息内容>的格式输入消息~" << endl;
+            cerr << "消息格式错误，请按照<用户名> <消息内容>的格式输入消息~" << strerror(errno) << endl;
             continue;
         }
 
@@ -98,8 +122,8 @@ void *send_msg(void *args)
         memcpy(buf + sizeof(udp_msg_header), str.data() + sub_idx + 1, header->msg_len);
 
         if ((send_len = sendto(*fd, buf, sizeof(udp_msg_header) + header->msg_len, 0,
-            static_cast<sockaddr*>(static_cast<void*>(&sever_addr)), sockaddr_len)) == -1) {
-            cerr << "消息发送失败" << endl;
+            static_cast<sockaddr*>(static_cast<void*>(&server_addr)), sockaddr_len)) == -1) {
+            cerr << "消息发送失败" << strerror(errno) << endl;
         }
         str.clear();
         str.resize(1024);
@@ -117,6 +141,9 @@ int main()
         cerr << "Socket creation failed" << endl;
         exit(EXIT_FAILURE);
     }
+    running_state.store(true);
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
 
     pthread_t recv_t, send_t;
     pthread_create(&send_t, nullptr, send_msg, static_cast<void*>(&sock_fd));
